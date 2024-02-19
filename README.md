@@ -54,6 +54,7 @@ In transforming the original data file into clean data, I removed unneeded rows 
     ```python
     cleaned_data['COLLECTION_DATE'] = pd.to_datetime(cleaned_data['COLLECTION_DATE']).dt.date
     ```
+
 3. **Handling '-1' Values in 'CCONCENTRATION' Column:** When inspecting the data, I noticed many entries in the 'CONCENTRATION' column were marked as '-1', which seems to be logically incorrect . A significant number of products were marked as '-1' as well. Instead of deleting these rows, I referred to the 'Data Dictionary', which indicated that a value of '-1' means not detected in labotory.
     >'Value is numerical. Sample with a metal concentration below the laboratory reporting limit is marked "-1", meaning "Not Detected".'
 
@@ -62,6 +63,7 @@ In transforming the original data file into clean data, I removed unneeded rows 
     ```python
     cleaned_data['CONCENTRATION_IS_NEGATIVE_ONE'] = data['CONCENTRATION'] == -1
     ```
+
 4. **Standardizing Units in 'UNITS' Column:** In the dataset, the 'UNITS' column contains a variety of values, with most being 'ppm'. However, there are entries listed as 'MG/L', 'MG/KG-DRY', and 'MG/CM^2'. The 'Data Dictionary' provided no more clarification on these units, so I decided to define a method to convert them. Under the assumption that the those products using mg/L as units have the same density of water, which means 1mg/L equals 1 ppm, I converted these values accordingly. However, due to the significant variation in solid densities, converting 'MG/CM^2' to ppm would require extensive effort and is dependent on the specific substance being measured. Therefore, I opted to set these values as 'None' for the time being. Those values converted are stored in a new column. Below is a snippet of the code used for unit conversion:
 
     ```python
@@ -80,3 +82,38 @@ In transforming the original data file into clean data, I removed unneeded rows 
 - [Final Spreadsheet](data/MetalContent.xlsx)
 
 ## Analysis
+
+### Description of aggregate statistics
+
+The initial set of aggregate statistics (N2-Q2 in [the spreadsheet](data/MetalContent.xlsx)) — average, maximum, minimum, and total concentrations of **_lead only_** values, excluding the "-1" (non-detected), provide an overview of lead contamination across all product categories. By calculating the average lead concentration, we get an insight of the typical level of lead presence, showing us what consumers might regularly encounter. The maximum concentration highlights the most extreme concentration cases, telling us the upper limits of lead exposure that could pose significant health risks. The minimum value, while excluding non-detections, reflects the lowest level of detectable lead, giving a baseline of concentration. The total sum, on the other hand, aggregates all detectable lead levels. These statistics reveal patterns and outliers in the data that are not immediately evident from raw figures.
+
+Specific to the **_Food-Spices_** category, the same set of statistics (N5-Q5 in [the spreadsheet](data/MetalContent.xlsx)) reveal unique risk characteristics for the category. The average concentrations for food-spices reflect the prevalence of lead contamination in cooking products, which can have serious dietary safety implications. Maximum values in this category indicate the highest levels of contamination in spices, identifying specific products that may require further inspection or immediate action. Meanwhile, the minimum concentrations tell us about lower levels of contamination, thus guiding consumers to make safer choices. Finally, the total concentration in food condiments summarizes the cumulative lead exposure potential of these products, emphasizing the importance of monitoring and regulating dietary lead levels to protect public health.
+
+### Pivot table
+| Types of Product/Made in Different Countries | Average of CONCENTRATION_PPM | Sum of CONCENTRATION_PPM | Total Average of CONCENTRATION_PPM | Total Sum of CONCENTRATION_PPM |
+|----------------------------------------------|------------------------------|--------------------------|------------------------------------|-------------------------------|
+| **Cosmetics**                                | 350094.6115                  | 58465800.13              | 350094.6115                        | 58465800.13                   |
+| AFGHANISTAN                                  | 763333.3333                  | 2290000                  | 763333.3333                        | 2290000                       |
+| BANGLADESH                                   | 4.406666667                  | 13.22                    | 4.406666667                        | 13.22                         |
+| CHINA                                        | 1.433333333                  | 3.43                     | 1.143333333                        | 3.43                          |
+| FRANCE                                       | 0.58                         | 0.58                     | 0.58                               | 0.58                          |
+
+Insights from the pivot table includes:
+
+**Geographic Decision-making:** Consumers may be more careful when choosing cosmetics originating from areas showing high lead concentrations like Afghanistan, Gambia, and Ghana. Awareness of product origin can become a critical factor in purchase decisions.
+
+**Regulatory Focus:** Regulatory bodies might use this data to prioritize inspections in regions identified with high concentrations. This targeted approach could lead to better resource allocation.
+
+**Product-Specific Considerations:** The high lead values observed may due to certain product types known to contain higher lead levels. Both consumers and regulators should be aware of this to make informed decisions.
+
+**Sample Size and Data Representation:** It's important to note that some totals are only slightly higher than the averages, indicating small sample sizes for certain regions or products. This means a larger dataset would provide a more accurate representation.
+
+
+### Chart Analysis
+![Total Concentration of Lead by Product Type](images/Chart.png)
+
+The chart above shows the total lead content of each product category. It is noteworthy that "cosmetics" have significantly higher lead levels compared to the other categories. This is a worrying trend, especially given the direct contact of cosmetics with the skin.
+
+In addition to this, the categories "Jewelry" and "Dietary Supplements" also show significant concentrations that warrant further investigation.
+
+This visualization suggests that we need to focus on the high-risk categories of cosmetics and jewelry for immediate action.
